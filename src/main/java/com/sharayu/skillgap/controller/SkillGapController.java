@@ -1,6 +1,7 @@
 package com.sharayu.skillgap.controller;
 
 
+import com.sharayu.skillgap.dto.SkillGapAnalysisResponseDto;
 import com.sharayu.skillgap.dto.SkillGapDetailDto;
 import com.sharayu.skillgap.service.SkillGapService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,11 +20,12 @@ public class SkillGapController {
         this.skillGapService = skillGapService;
     }
 
-    @GetMapping("student/{studentId}/role/{roleId}")
-    public List<SkillGapDetailDto> analyze(
+    @GetMapping("/student/{studentId}/role/{roleId}")
+    public SkillGapAnalysisResponseDto analyze(
             @PathVariable Long studentId,
-            @PathVariable Long roleId
-    ){
-        return  skillGapService.analyzeSkillGap(studentId,roleId);
+            @PathVariable Long roleId) {
+
+        return skillGapService.analyzeSkillGap(studentId, roleId);
     }
+
 }

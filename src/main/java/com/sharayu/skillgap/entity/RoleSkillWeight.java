@@ -1,7 +1,12 @@
 package com.sharayu.skillgap.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 public class RoleSkillWeight {
     @Id
@@ -16,29 +21,5 @@ public class RoleSkillWeight {
     @JoinColumn(name="skill_id")
     private Skill skill;
 
-    public RoleSkillWeight() {
 
-    }
-    public Long getId() {
-        return id;
-    }
-    public Integer getRequiredLevel() {
-        return requiredLevel;
-    }
-    public void setRequiredLevel(Integer requiredLevel) {
-        this.requiredLevel = requiredLevel;
-    }
-
-    public JobRole getJobRole() {
-        return jobRole;
-    }
-    public void setJobRole(JobRole jobRole) {
-        this.jobRole = jobRole;
-    }
-    public Skill getSkill() {
-        return skill;
-    }
-    public void setSkill(Skill skill) {
-        this.skill = skill;
-    }
 }

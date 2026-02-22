@@ -1,5 +1,6 @@
 package com.sharayu.skillgap.service;
 
+import com.sharayu.skillgap.dto.SkillGapAnalysisResponseDto;
 import com.sharayu.skillgap.dto.SkillGapDetailDto;
 import com.sharayu.skillgap.entity.RoleSkillWeight;
 import com.sharayu.skillgap.entity.StudentSkill;
@@ -19,39 +20,70 @@ public class SkillGapService {
     private StudentSkillRepository studentSkillRepository;
 
 
-    public SkillGapService( RoleSkillWeightRepository roleSkillWeightRepository,StudentSkillRepository studentSkillRepository) {
+    public SkillGapService(RoleSkillWeightRepository roleSkillWeightRepository, StudentSkillRepository studentSkillRepository) {
         this.roleSkillWeightRepository = roleSkillWeightRepository;
         this.studentSkillRepository = studentSkillRepository;
     }
 
-    public List<SkillGapDetailDto> analyzeSkillGap(Long studentId, Long roleId) {
-        List<RoleSkillWeight> rollSkills = roleSkillWeightRepository.findByJobRoleId(roleId);
-        List<StudentSkill> studentSkills = studentSkillRepository.findByStudentId(studentId);
+    public SkillGapAnalysisResponseDto analyzeSkillGap(Long studentId, Long roleId) {
 
-        Map<Long, Integer> studentSkillMap= studentSkills.stream().collect(Collectors.toMap(
-                ss -> ss.getSkill().getId(),
-                StudentSkill::getCurrentLevel
-        ));
+        List<RoleSkillWeight> roleSkills =
+                roleSkillWeightRepository.findByJobRoleId(roleId);
 
-        List<SkillGapDetailDto> result = new ArrayList<>();
+        List<StudentSkill> studentSkills =
+                studentSkillRepository.findByStudentId(studentId);
 
-        for(RoleSkillWeight roleSkillWeight:rollSkills) {
-            Long skillId = roleSkillWeight.getSkill().getId();
-            String skillName = roleSkillWeight.getSkill().getSkillName();
-            Integer requiredLevel = roleSkillWeight.getRequiredLevel();
+        Map<Long, Integer> studentSkillMap = studentSkills.stream()
+                .collect(Collectors.toMap(
+                        ss -> ss.getSkill().getId(),
+                        ss -> ss.getCurrentLevel() == null ? 0 : ss.getCurrentLevel()
+                ));
 
-            Integer currentLevel = studentSkillMap.getOrDefault(skillId, 0);
+        List<SkillGapDetailDto> details = new ArrayList<>();
 
-            Integer gap = requiredLevel - currentLevel;
+        int totalRequired = 0;
+        int totalAchieved = 0;
 
-            result.add(new SkillGapDetailDto(
+        for (RoleSkillWeight rsw : roleSkills) {
+
+            Long skillId = rsw.getSkill().getId();
+            String skillName = rsw.getSkill().getSkillName();
+            int requiredLevel = rsw.getRequiredLevel();
+
+            int currentLevel = studentSkillMap.getOrDefault(skillId, 0);
+
+            int achieved = Math.min(currentLevel, requiredLevel);
+            int gap = requiredLevel - currentLevel;
+
+            totalRequired += requiredLevel;
+            totalAchieved += achieved;
+
+            details.add(new SkillGapDetailDto(
                     skillName,
                     requiredLevel,
                     currentLevel,
                     gap > 0 ? gap : 0
             ));
         }
-        return result;
 
+        double matchPercentage =
+                totalRequired == 0 ? 0 :
+                        ((double) totalAchieved / totalRequired) * 100;
+
+        boolean eligible = matchPercentage >= 70;  // eligibility rule
+
+        String roleName = roleSkills.isEmpty() ?
+                "Unknown Role" :
+                roleSkills.get(0).getJobRole().getRoleName();
+
+        return new SkillGapAnalysisResponseDto(
+                roleName,
+                Math.round(matchPercentage * 100.0) / 100.0,
+                eligible,
+                totalRequired,
+                totalAchieved,
+                details
+        );
     }
+
 }

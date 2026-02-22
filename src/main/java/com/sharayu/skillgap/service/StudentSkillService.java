@@ -4,6 +4,7 @@ import com.sharayu.skillgap.dto.StudentSkillResponseDto;
 import com.sharayu.skillgap.entity.StudentSkill;
 import com.sharayu.skillgap.repository.StudentSkillRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -17,7 +18,7 @@ public class StudentSkillService {
      public StudentSkill addStudentSkill(StudentSkill studentSkill) {
          return studentSkillRepository.save(studentSkill);
      }
-
+    @Transactional
     public List<StudentSkillResponseDto> getSkillsByStudentId(Long studentId) {
 
         List<StudentSkill> skills = studentSkillRepository.findByStudentId(studentId);
@@ -30,5 +31,6 @@ public class StudentSkillService {
                 ))
                 .toList();
     }
+
 
 }

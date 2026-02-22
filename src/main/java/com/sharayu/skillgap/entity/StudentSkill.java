@@ -1,7 +1,12 @@
 package com.sharayu.skillgap.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 public class StudentSkill {
     @Id
@@ -17,29 +22,5 @@ public class StudentSkill {
     @JoinColumn(name="skill_id")
     private Skill skill;
 
-    public StudentSkill() {
 
-    }
-    public Long getId() {
-        return id;
-    }
-    public Integer getCurrentLevel() {
-        return currentLevel;
-    }
-    public void setCurrentLevel(Integer currentLevel) {
-        this.currentLevel = currentLevel;
-    }
-
-    public Student getStudent() {
-        return student;
-    }
-    public void setStudent(Student student) {
-        this.student = student;
-    }
-    public Skill getSkill() {
-        return skill;
-    }
-    public void setSkill(Skill skill) {
-        this.skill = skill;
-    }
 }
