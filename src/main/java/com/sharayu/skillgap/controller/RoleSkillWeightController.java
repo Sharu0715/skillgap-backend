@@ -1,33 +1,40 @@
 package com.sharayu.skillgap.controller;
 
-
+import com.sharayu.skillgap.dto.RoleSkillWeightRequestDto;
 import com.sharayu.skillgap.dto.RoleSkillWeightResponseDto;
 import com.sharayu.skillgap.entity.RoleSkillWeight;
+import com.sharayu.skillgap.entity.StudentSkill;
 import com.sharayu.skillgap.service.RoleSkillWeightService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static com.sharayu.skillgap.service.RoleSkillWeightService.*;
-
 @RestController
-@RequestMapping("api/roleSkillWeights")
+@RequiredArgsConstructor
+@RequestMapping("/api/roleSkills")
 public class RoleSkillWeightController {
 
     private final RoleSkillWeightService roleSkillWeightService;
 
-    public RoleSkillWeightController(RoleSkillWeightService roleSkillWeightService) {
-        this.roleSkillWeightService = roleSkillWeightService;
-    }
-
     @PostMapping
-    public RoleSkillWeight addRoleSkill(@RequestParam Long roleId, @RequestParam Long skillId, @RequestParam Integer requiredLevel) {
-        return roleSkillWeightService.addRoleSkill(roleId, skillId, requiredLevel);
+    public RoleSkillWeightResponseDto addRoleSkill(
+            @Valid @RequestBody RoleSkillWeightRequestDto request) {
+
+
+
+        return roleSkillWeightService.addRoleSkill(request);
     }
 
     @GetMapping("/role/{roleId}")
-    public List<RoleSkillWeightResponseDto> getSkillsByRole(@PathVariable Long roleId) {
-        return roleSkillWeightService.getSkillsByRole(roleId);
+    public List<RoleSkillWeightResponseDto> getSkillsByRoleId(
+            @PathVariable Long roleId) {
+
+        return roleSkillWeightService.getSkillsByRoleId(roleId);
     }
 
+
 }
+

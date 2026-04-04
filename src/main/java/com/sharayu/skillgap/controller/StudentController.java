@@ -2,20 +2,22 @@ package com.sharayu.skillgap.controller;
 
 import com.sharayu.skillgap.dto.StudentRequestDto;
 import com.sharayu.skillgap.dto.StudentResponseDto;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import com.sharayu.skillgap.entity.Student;
 import com.sharayu.skillgap.service.StudentService;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/students")
 public class StudentController {
 
     private final StudentService studentService;
 
-    public StudentController(StudentService studentService) {
+   /* public StudentController(StudentService studentService) {
         this.studentService = studentService;
-    }
+    }*/
 
     @PostMapping
     public StudentResponseDto register(@RequestBody StudentRequestDto dto) {

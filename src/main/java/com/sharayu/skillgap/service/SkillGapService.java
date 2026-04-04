@@ -1,34 +1,54 @@
 package com.sharayu.skillgap.service;
 
+import com.sharayu.skillgap.entity.Student;
+import com.sharayu.skillgap.entity.JobRole;
+import com.sharayu.skillgap.exception.ResourceNotFoundException;
+import com.sharayu.skillgap.repository.StudentRepository;
+import com.sharayu.skillgap.repository.JobRoleRepository;
 import com.sharayu.skillgap.dto.SkillGapAnalysisResponseDto;
 import com.sharayu.skillgap.dto.SkillGapDetailDto;
 import com.sharayu.skillgap.entity.RoleSkillWeight;
 import com.sharayu.skillgap.entity.StudentSkill;
 import com.sharayu.skillgap.repository.RoleSkillWeightRepository;
 import com.sharayu.skillgap.repository.StudentSkillRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class SkillGapService {
-    private RoleSkillWeightRepository roleSkillWeightRepository;
-    private StudentSkillRepository studentSkillRepository;
+
+    private final RoleSkillWeightRepository roleSkillWeightRepository;
+    private final StudentSkillRepository studentSkillRepository;
+    private final StudentRepository studentRepository;
+    private final JobRoleRepository jobRoleRepository;
 
 
-    public SkillGapService(RoleSkillWeightRepository roleSkillWeightRepository, StudentSkillRepository studentSkillRepository) {
+   /* public SkillGapService(RoleSkillWeightRepository roleSkillWeightRepository, StudentSkillRepository studentSkillRepository,StudentRepository studentRepository, JobRoleRepository jobRoleRepository) {
         this.roleSkillWeightRepository = roleSkillWeightRepository;
         this.studentSkillRepository = studentSkillRepository;
-    }
+        this.studentRepository = studentRepository;
+        this.jobRoleRepository = jobRoleRepository;
+    }*/
 
     public SkillGapAnalysisResponseDto analyzeSkillGap(Long studentId, Long roleId) {
 
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found this id: "+studentId));
+
+        JobRole role = jobRoleRepository.findById(roleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found this id: "+roleId));
+
         List<RoleSkillWeight> roleSkills =
                 roleSkillWeightRepository.findByJobRoleId(roleId);
+
+        if (roleSkills.isEmpty()) {
+            throw new RuntimeException("No skills defined for role: " + role.getRoleName());
+        }
 
         List<StudentSkill> studentSkills =
                 studentSkillRepository.findByStudentId(studentId);
@@ -36,7 +56,7 @@ public class SkillGapService {
         Map<Long, Integer> studentSkillMap = studentSkills.stream()
                 .collect(Collectors.toMap(
                         ss -> ss.getSkill().getId(),
-                        ss -> ss.getCurrentLevel() == null ? 0 : ss.getCurrentLevel()
+                        ss -> ss.getCurrentLevel()
                 ));
 
         List<SkillGapDetailDto> details = new ArrayList<>();
@@ -53,7 +73,7 @@ public class SkillGapService {
             int currentLevel = studentSkillMap.getOrDefault(skillId, 0);
 
             int achieved = Math.min(currentLevel, requiredLevel);
-            int gap = requiredLevel - currentLevel;
+            int gap = Math.max(requiredLevel - currentLevel, 0);
 
             totalRequired += requiredLevel;
             totalAchieved += achieved;
@@ -62,7 +82,7 @@ public class SkillGapService {
                     skillName,
                     requiredLevel,
                     currentLevel,
-                    gap > 0 ? gap : 0
+                    gap
             ));
         }
 
@@ -70,14 +90,10 @@ public class SkillGapService {
                 totalRequired == 0 ? 0 :
                         ((double) totalAchieved / totalRequired) * 100;
 
-        boolean eligible = matchPercentage >= 70;  // eligibility rule
-
-        String roleName = roleSkills.isEmpty() ?
-                "Unknown Role" :
-                roleSkills.get(0).getJobRole().getRoleName();
+        boolean eligible = matchPercentage >= 70;
 
         return new SkillGapAnalysisResponseDto(
-                roleName,
+                role.getRoleName(),
                 Math.round(matchPercentage * 100.0) / 100.0,
                 eligible,
                 totalRequired,
@@ -85,5 +101,4 @@ public class SkillGapService {
                 details
         );
     }
-
 }

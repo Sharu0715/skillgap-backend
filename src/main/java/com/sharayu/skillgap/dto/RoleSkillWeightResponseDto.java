@@ -1,14 +1,15 @@
 package com.sharayu.skillgap.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
 @AllArgsConstructor
 public class RoleSkillWeightResponseDto {
+
+    private Long roleId;
     private Long skillId;
     private String skillName;
     private Integer requiredLevel;
-
-
 }

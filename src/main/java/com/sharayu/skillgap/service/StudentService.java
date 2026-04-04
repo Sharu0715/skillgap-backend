@@ -3,18 +3,19 @@ package com.sharayu.skillgap.service;
 import com.sharayu.skillgap.dto.StudentRequestDto;
 import com.sharayu.skillgap.dto.StudentResponseDto;
 import com.sharayu.skillgap.entity.Student;
+import com.sharayu.skillgap.exception.ResourceNotFoundException;
 import com.sharayu.skillgap.repository.StudentRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
+@RequiredArgsConstructor
 public class StudentService {
-    private StudentRepository studentRepository;
+    private final StudentRepository studentRepository;
 
-    public StudentService(StudentRepository studentRepository) {
+    /*public StudentService(StudentRepository studentRepository) {
         this.studentRepository = studentRepository;
-    }
+    }*/
 
     public StudentResponseDto registerStudent(StudentRequestDto dto) {
         Student student = new Student();
@@ -34,7 +35,7 @@ public class StudentService {
     public StudentResponseDto getStudentById(Long id) {
 
         Student student = studentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Student not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Student Not found for this id: "+id));
 
         return new StudentResponseDto(
                 student.getId(),
