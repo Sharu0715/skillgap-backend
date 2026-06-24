@@ -26,7 +26,7 @@ public class StudentSkill {
     private Student student;
 
     @ManyToOne(optional = false)
-    @JoinColumn( name="skill+id",nullable = false)
+    @JoinColumn( name="skill_id",nullable = false)
     private Skill skill;
 
 

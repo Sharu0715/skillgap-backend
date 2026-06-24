@@ -14,6 +14,7 @@ import com.sharayu.skillgap.repository.StudentSkillRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -47,7 +48,7 @@ public class SkillGapService {
                 roleSkillWeightRepository.findByJobRoleId(roleId);
 
         if (roleSkills.isEmpty()) {
-            throw new RuntimeException("No skills defined for role: " + role.getRoleName());
+            throw new ResourceNotFoundException("No skills defined for role: " + role.getRoleName());
         }
 
         List<StudentSkill> studentSkills =
@@ -100,5 +101,38 @@ public class SkillGapService {
                 totalAchieved,
                 details
         );
+
+
+        }
+    public  List<SkillGapAnalysisResponseDto> analyzeAllRoles(Long studentId){
+        studentRepository.findById(studentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found this id: "+studentId));
+
+        List<JobRole> roles = jobRoleRepository.findAll();
+        List<SkillGapAnalysisResponseDto> results = new ArrayList<>();
+        for(JobRole role : roles){
+            SkillGapAnalysisResponseDto result= analyzeSkillGap(studentId, role.getId());
+
+            results.add(result);
+        }
+        results.sort((a,b) ->
+                Double.compare(b.getMatchPercentage(), a.getMatchPercentage()));
+
+        return results;
     }
+
+    public SkillGapAnalysisResponseDto getBestRole(Long studentId) {
+
+        List<SkillGapAnalysisResponseDto> roles =
+                analyzeAllRoles(studentId);
+
+        if (roles.isEmpty()) {
+            throw new ResourceNotFoundException("No roles found");
+        }
+
+        return roles.stream()
+                .max(Comparator.comparing(SkillGapAnalysisResponseDto::getMatchPercentage))
+                .orElseThrow();
+    }
+
 }

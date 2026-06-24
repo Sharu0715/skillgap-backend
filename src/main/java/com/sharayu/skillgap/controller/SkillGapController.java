@@ -5,6 +5,7 @@ import com.sharayu.skillgap.dto.SkillGapAnalysisResponseDto;
 import com.sharayu.skillgap.dto.SkillGapDetailDto;
 import com.sharayu.skillgap.service.SkillGapService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,6 +29,19 @@ public class SkillGapController {
             @PathVariable Long roleId) {
 
         return skillGapService.analyzeSkillGap(studentId, roleId);
+    }
+
+    @GetMapping("/student/{studentId}/all-roles")
+    public List<SkillGapAnalysisResponseDto> analyzeAllRoles(@PathVariable Long studentId) {
+        return skillGapService.analyzeAllRoles(studentId);
+    }
+    @GetMapping("/student/{studentId}/best-role")
+    public ResponseEntity<SkillGapAnalysisResponseDto>
+    getBestRole(@PathVariable Long studentId) {
+
+        return ResponseEntity.ok(
+                skillGapService.getBestRole(studentId)
+        );
     }
 
 }
