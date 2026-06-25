@@ -1,5 +1,6 @@
 package com.sharayu.skillgap.service;
 
+import com.sharayu.skillgap.dto.RoleRecommendationDto;
 import com.sharayu.skillgap.entity.Student;
 import com.sharayu.skillgap.entity.JobRole;
 import com.sharayu.skillgap.exception.ResourceNotFoundException;
@@ -14,7 +15,6 @@ import com.sharayu.skillgap.repository.StudentSkillRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -104,35 +104,48 @@ public class SkillGapService {
 
 
         }
-    public  List<SkillGapAnalysisResponseDto> analyzeAllRoles(Long studentId){
+    public List<RoleRecommendationDto> analyzeAllRoles(Long studentId) {
+
         studentRepository.findById(studentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Student not found this id: "+studentId));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Student not found this id: " + studentId));
 
         List<JobRole> roles = jobRoleRepository.findAll();
-        List<SkillGapAnalysisResponseDto> results = new ArrayList<>();
-        for(JobRole role : roles){
-            SkillGapAnalysisResponseDto result= analyzeSkillGap(studentId, role.getId());
+        List<RoleRecommendationDto> results = new ArrayList<>();
 
-            results.add(result);
+        for (JobRole role : roles) {
+
+            SkillGapAnalysisResponseDto result =
+                    analyzeSkillGap(studentId, role.getId());
+
+            results.add(
+                    new RoleRecommendationDto(
+                            result.getRoleName(),
+                            result.getMatchPercentage(),
+                            result.isEligible()
+                    )
+            );
         }
-        results.sort((a,b) ->
-                Double.compare(b.getMatchPercentage(), a.getMatchPercentage()));
+
+        results.sort((a, b) ->
+                Double.compare(
+                        b.getMatchPercentage(),
+                        a.getMatchPercentage()));
 
         return results;
     }
 
-    public SkillGapAnalysisResponseDto getBestRole(Long studentId) {
+    public RoleRecommendationDto getBestRole(Long studentId) {
 
-        List<SkillGapAnalysisResponseDto> roles =
+        List<RoleRecommendationDto> roles =
                 analyzeAllRoles(studentId);
 
         if (roles.isEmpty()) {
             throw new ResourceNotFoundException("No roles found");
         }
 
-        return roles.stream()
-                .max(Comparator.comparing(SkillGapAnalysisResponseDto::getMatchPercentage))
-                .orElseThrow();
+        return roles.get(0);
     }
 
 }
