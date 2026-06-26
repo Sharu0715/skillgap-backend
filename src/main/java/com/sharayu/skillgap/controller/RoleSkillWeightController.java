@@ -9,6 +9,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -16,6 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/roleSkills")
 public class RoleSkillWeightController {
+    private static final Logger log= LoggerFactory.getLogger(RoleSkillWeightController.class);
 
     private final RoleSkillWeightService roleSkillWeightService;
 
@@ -23,14 +26,15 @@ public class RoleSkillWeightController {
     public RoleSkillWeightResponseDto addRoleSkill(
             @Valid @RequestBody RoleSkillWeightRequestDto request) {
 
-
-
+        log.info("Received request to save roleSkillWeight: {} ", request);
         return roleSkillWeightService.addRoleSkill(request);
     }
 
     @GetMapping("/role/{roleId}")
     public List<RoleSkillWeightResponseDto> getSkillsByRoleId(
             @PathVariable Long roleId) {
+
+        log.info("Received request to get roleSkillWeights by roleId: {}", roleId);
 
         return roleSkillWeightService.getSkillsByRoleId(roleId);
     }

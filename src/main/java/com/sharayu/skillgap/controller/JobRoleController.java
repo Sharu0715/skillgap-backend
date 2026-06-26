@@ -5,6 +5,8 @@ import com.sharayu.skillgap.entity.Skill;
 import com.sharayu.skillgap.service.JobRoleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -16,17 +18,20 @@ import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 @RequiredArgsConstructor
 
 public class JobRoleController {
+    private static final Logger log = LoggerFactory.getLogger(JobRoleController.class);
     private final JobRoleService jobRoleService;
     /*public JobRoleController(JobRoleService jobRoleService) {
         this.jobRoleService = jobRoleService;
     }*/
     @PostMapping
     public JobRole createJobRole(@RequestBody JobRole jobRole) {
+        log.info("Received request to create job role: {}", jobRole);
         return jobRoleService.addjobRole(jobRole);
     }
 
     @GetMapping("{id}")
     public JobRole getJobRolesById(@PathVariable Long id) {
+        log.info("Received request to get Job roles by id: {}", id);
         return jobRoleService.getJobRolesById(id);
     }
 }
