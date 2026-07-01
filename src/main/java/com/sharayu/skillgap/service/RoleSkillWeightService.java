@@ -5,6 +5,7 @@ import com.sharayu.skillgap.dto.RoleSkillWeightResponseDto;
 import com.sharayu.skillgap.entity.JobRole;
 import com.sharayu.skillgap.entity.RoleSkillWeight;
 import com.sharayu.skillgap.entity.Skill;
+import com.sharayu.skillgap.entity.StudentSkill;
 import com.sharayu.skillgap.exception.*;
 import com.sharayu.skillgap.repository.JobRoleRepository;
 import com.sharayu.skillgap.repository.RoleSkillWeightRepository;
@@ -89,6 +90,30 @@ public class RoleSkillWeightService {
                         rs.getRequiredLevel()
                 ))
                 .toList();
+    }
+
+    public RoleSkillWeight updateRoleSkill(Long roleId, Long skillId, RoleSkillWeight RoleSkill) {
+
+        RoleSkillWeight existing=roleSkillWeightRepository.findByJobRoleIdAndSkillId(roleId,skillId)
+                .orElseThrow(() -> new ResourceNotFoundException("RoleSkills Not found for this roleId : "+roleId +" and skillId : "+skillId));
+
+
+        existing.setRequiredLevel(RoleSkill.getRequiredLevel());
+
+        log.info("Updating RoleSkill with roleId:{}, skillId {}", roleId, skillId);
+
+        return roleSkillWeightRepository.save(existing);
+    }
+
+    public void deleteRoleSkill(Long roleId, Long skillId) {
+
+        RoleSkillWeight existing = roleSkillWeightRepository.findByJobRoleIdAndSkillId(roleId,skillId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("RoleSkill not found for this roleId: "+roleId+" and skillId : "+skillId));
+
+        log.info("Deleting RoleSkill with  roleId:{}, skillIdol {}",roleId,skillId);
+
+        roleSkillWeightRepository.delete(existing);
     }
 
 }

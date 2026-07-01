@@ -3,6 +3,7 @@ package com.sharayu.skillgap.controller;
 import com.sharayu.skillgap.entity.Skill;
 import com.sharayu.skillgap.service.SkillService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,4 +33,29 @@ public class SkillController {
         return skillService.getSkillById(id);
     }
 
+    @GetMapping
+    public ResponseEntity<List<Skill>> getAllSkills(){
+
+        log.info("Received request to get all skills");
+
+        return  ResponseEntity.ok(skillService.getAllSkills());
+
+    }
+
+    @PutMapping("/{id}")
+    public Skill updateSkill(@PathVariable Long id, @RequestBody Skill skill){
+
+        log.info("Received request to update skill : {}", skill);
+
+        return skillService.updateSkill(id, skill);
+    }
+
+    @DeleteMapping("/{id}")
+    public Skill deleteSkill(@PathVariable Long id){
+
+        log.info("Received request to delete skill : {}", id);
+
+        skillService.deleteSkill(id);
+        return skillService.getSkillById(id);
+    }
 }

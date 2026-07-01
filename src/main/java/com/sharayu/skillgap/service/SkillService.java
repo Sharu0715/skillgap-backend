@@ -1,5 +1,6 @@
 package com.sharayu.skillgap.service;
 
+import com.sharayu.skillgap.entity.JobRole;
 import com.sharayu.skillgap.entity.Skill;
 import com.sharayu.skillgap.exception.DuplicateResourceException;
 import com.sharayu.skillgap.exception.ResourceNotFoundException;
@@ -8,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +39,36 @@ public class SkillService {
         log.info("Fetching Skill by id:{}",id);
         return skillRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Skill not found with id: " +id));
+    }
+
+    public List<Skill> getAllSkills() {
+
+        log.info("Fetching all skills");
+
+        return skillRepository.findAll();
+    }
+
+    public Skill updateSkill(Long id, Skill skill) {
+
+        Skill existing = skillRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Skill Not found for this id: " + id));
+        existing.setSkillName(skill.getSkillName());
+
+        log.info("Updating Skill with name:{}", skill.getSkillName());
+
+        return skillRepository.save(existing);
+
+    }
+
+    public void deleteSkill(Long id) {
+
+        Skill skill = skillRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Skill not found for this id: "+id));
+
+        log.info("Skill found successfully with id:{}",skill.getId());
+
+        skillRepository.delete(skill);
     }
 
 }

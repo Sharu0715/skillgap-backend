@@ -1,6 +1,7 @@
 package com.sharayu.skillgap.service;
 
 import com.sharayu.skillgap.dto.StudentSkillResponseDto;
+import com.sharayu.skillgap.entity.JobRole;
 import com.sharayu.skillgap.entity.Skill;
 import com.sharayu.skillgap.entity.Student;
 import com.sharayu.skillgap.entity.StudentSkill;
@@ -83,6 +84,29 @@ public class StudentSkillService {
                         ss.getCurrentLevel()
                 ))
                 .toList();
+    }
+
+    public StudentSkill updateStudentSkill(Long studentId, Long skillId, StudentSkill studentSkill) {
+
+        StudentSkill existing=studentSkillRepository.findByStudentIdAndSkillId(studentId, skillId)
+                .orElseThrow(() -> new ResourceNotFoundException("StudentSkill Not found for this studentId: "+studentId + " and skillId: "+skillId));
+
+        existing.setCurrentLevel(studentSkill.getCurrentLevel());
+
+        log.info("Updating current level for studentSkill with studentId {} and skillId {}", studentId,  skillId);
+
+        return studentSkillRepository.save(existing);
+    }
+
+    public void deleteStudentSkill(Long studentId, Long skillId) {
+
+        StudentSkill existing = studentSkillRepository.findByStudentIdAndSkillId(studentId,skillId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("StudentSkill not found for this studentId: "+studentId + "with this skillId" + skillId));
+
+        log.info("Deleting studentSkill with studentId {} and skillId {}", studentId, skillId);
+
+        studentSkillRepository.delete(existing);
     }
 
 

@@ -39,6 +39,24 @@ public class RoleSkillWeightController {
         return roleSkillWeightService.getSkillsByRoleId(roleId);
     }
 
+    @PutMapping("/role/{roleId}/skill/{skillId}")
+    public ResponseEntity<RoleSkillWeight> updateRoleSkill(@PathVariable Long roleId,@PathVariable Long skillId, @Valid @RequestBody RoleSkillWeight roleSkill) {
+
+        log.info("Received request to update roleSkill with roleId {}, skillId {}", roleId, skillId);
+        RoleSkillWeight updated = roleSkillWeightService.updateRoleSkill(roleId, skillId, roleSkill);
+
+        return ResponseEntity.ok(updated);
+    }
+
+    @DeleteMapping("/role/{roleId}/skill/{skillId}")
+    public ResponseEntity<String> deleteRoleSkill(@PathVariable Long roleId, @PathVariable Long skillId) {
+
+        log.info("Received request to delete roleSkill by roleId : {}, skillId {}", roleId, skillId);
+
+        roleSkillWeightService.deleteRoleSkill(roleId, skillId);
+        return ResponseEntity.ok("RoleSkill deleted successfully");
+    }
+
 
 }
 

@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class StudentService {
@@ -52,6 +54,38 @@ public class StudentService {
                 student.getName(),
                 student.getEmail()
         );
+    }
+
+    public List<Student> getAllStudents() {
+
+        log.info("Starting all students request");
+
+        return studentRepository.findAll();
+    }
+
+    public Student updateStudent(Long id, Student updatedStudent) {
+
+        Student existing= studentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Student Not found for this id: "+id));
+
+        log.info("Student found with id: {},updatedStudent:{}",existing.getName(),existing.getEmail());
+
+        existing.setName(updatedStudent.getName());
+        existing.setEmail(updatedStudent.getEmail());
+
+        return studentRepository.save(existing);
+    }
+
+
+    public void deleteStudent(Long id) {
+
+        Student student = studentRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Student Not found for this id: "+id));
+
+        log.info("student found successfully with id:{}",student.getId());
+
+        studentRepository.delete(student);
     }
 
 }

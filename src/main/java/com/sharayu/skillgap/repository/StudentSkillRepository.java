@@ -6,6 +6,7 @@ import com.sharayu.skillgap.entity.StudentSkill;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import java.util.Optional;
 
 import java.util.List;
 
@@ -14,4 +15,6 @@ public interface StudentSkillRepository extends JpaRepository<StudentSkill, Long
     List<StudentSkill> findByStudentId(@Param("studentId") Long studentId);
      boolean existsByStudentAndSkill(Student student, Skill skillId );
 
+
+    Optional<StudentSkill> findByStudentIdAndSkillId(Long studentId, Long skillId);
 }

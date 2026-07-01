@@ -27,11 +27,9 @@ public class StudentSkillController {
     @PostMapping
     public ResponseEntity<StudentSkill> addStudentSkill(
             @Valid @RequestBody StudentSkill studentSkill) {
-
         StudentSkill saved = studentSkillService.addStudentSkill(studentSkill);
 
         log.info("Received request to save studentSkill : {}", studentSkill);
-
         return ResponseEntity.status(201).body(saved);
     }
 
@@ -41,6 +39,29 @@ public class StudentSkillController {
         log.info("Received request to get studentSkills by studentId : {}", studentId);
         return studentSkillService.getSkillsByStudentId(studentId);
     }
+
+    @PutMapping("/student/{studentId}/skill/{skillId}")
+    public ResponseEntity<StudentSkill> updateStudentSkill(@PathVariable Long studentId,
+                                                           @PathVariable Long skillId,
+                                                           @Valid @RequestBody StudentSkill studentSkill) {
+
+        log.info("Received request to update studentSkill put to studentId {} skillId {}", studentId, skillId);
+        StudentSkill updated = studentSkillService.updateStudentSkill(studentId, skillId, studentSkill);
+
+        return ResponseEntity.ok(updated);
+    }
+
+    @DeleteMapping("/student/{studentId}/skill/{skillId}")
+    public ResponseEntity<String> deleteStudentSkill(@PathVariable Long studentId, @PathVariable Long skillId) {
+
+        log.info("Received request to delete studentSkill delete with studentId {} skillId {} ", studentId, skillId);
+
+        studentSkillService.deleteStudentSkill(studentId, skillId);
+
+        return ResponseEntity.ok("StudentSkill deleted successfully");
+    }
+
+
 
 }
 
