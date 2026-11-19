@@ -4,6 +4,8 @@ import com.sharayu.skillgap.entity.JobRole;
 import com.sharayu.skillgap.entity.Skill;
 import com.sharayu.skillgap.service.JobRoleService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
@@ -37,11 +39,18 @@ public class JobRoleController {
     }
 
     @GetMapping
-    public ResponseEntity<List<JobRole>> getAllJobRoles() {
+    public ResponseEntity<Page<JobRole>> getAllJobRoles(
+    @RequestParam(defaultValue = "0") int page,
+    @RequestParam(defaultValue = "10") int size) {
 
-        log.info("Received request to get all job roles");
+        log.info("Received request to get jobRoles. Page: {}, Size: {}",
+                page, size);
 
-        return ResponseEntity.ok(jobRoleService.getAllJobRoles());
+        return ResponseEntity.ok(
+                jobRoleService.getAllJobRoles(
+                        PageRequest.of(page, size)
+                )
+        );
     }
 
     @PutMapping("/{id}")

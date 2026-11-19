@@ -56,4 +56,16 @@ public class SkillGapController {
         return skillGapService.getBestRole(studentId);
     }
 
+    @GetMapping("/student/{studentId}/ai-recommendation")
+    public String getAiRecommendation(
+            @PathVariable Long studentId) {
+
+        log.info(
+                "Received AI recommendation request for studentId: {}",
+                studentId
+        );
+
+        return skillGapService.getAiRecommendation(studentId);
+    }
+
 }

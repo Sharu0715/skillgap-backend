@@ -7,18 +7,21 @@ import com.sharayu.skillgap.exception.ResourceNotFoundException;
 import com.sharayu.skillgap.repository.JobRoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
-@Slf4j
+
 @Service
 @RequiredArgsConstructor
 
 public class JobRoleService {
-    //private static final Logger log = LoggerFactory.getLogger(JobRoleService.class);
+    private static final Logger log = LoggerFactory.getLogger(JobRoleService.class);
     private final JobRoleRepository jobRoleRepository;
 
     /*public JobRoleService(JobRoleRepository jobRoleRepository){
@@ -41,11 +44,11 @@ public class JobRoleService {
                 .orElseThrow(() -> new ResourceNotFoundException("JobRole not found with id: " + id));
     }
 
-    public List<JobRole> getAllJobRoles() {
+    public Page<JobRole> getAllJobRoles(Pageable pageable) {
 
         log.info("Fetching all JobRoles");
 
-        return jobRoleRepository.findAll();
+        return jobRoleRepository.findAll(pageable);
     }
 
     public JobRole updateJobRole(Long id, JobRole jobRole) {

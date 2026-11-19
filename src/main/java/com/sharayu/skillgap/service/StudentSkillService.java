@@ -18,6 +18,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.AccessDeniedException;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +42,9 @@ public class StudentSkillService {
          }
          Long studentId = studentSkill.getStudent().getId();
          Long skillId = studentSkill.getSkill().getId();
+
+         validateStudentAccess(studentId);
+
          Student student = studentRepository.findById(studentId)
                  .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + studentId));
 
@@ -65,6 +71,8 @@ public class StudentSkillService {
     @Transactional(readOnly = true)
     public List<StudentSkillResponseDto> getSkillsByStudentId(Long studentId) {
 
+         validateStudentAccess(studentId);
+
          log.info("Fetching  skills for studentId:{}",studentId);
 
         List<StudentSkill> skills = studentSkillRepository.findByStudentId(studentId);
@@ -88,6 +96,8 @@ public class StudentSkillService {
 
     public StudentSkill updateStudentSkill(Long studentId, Long skillId, StudentSkill studentSkill) {
 
+         validateStudentAccess(studentId);
+
         StudentSkill existing=studentSkillRepository.findByStudentIdAndSkillId(studentId, skillId)
                 .orElseThrow(() -> new ResourceNotFoundException("StudentSkill Not found for this studentId: "+studentId + " and skillId: "+skillId));
 
@@ -99,7 +109,7 @@ public class StudentSkillService {
     }
 
     public void deleteStudentSkill(Long studentId, Long skillId) {
-
+        validateStudentAccess(studentId);
         StudentSkill existing = studentSkillRepository.findByStudentIdAndSkillId(studentId,skillId)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("StudentSkill not found for this studentId: "+studentId + "with this skillId" + skillId));
@@ -109,5 +119,29 @@ public class StudentSkillService {
         studentSkillRepository.delete(existing);
     }
 
+    private void validateStudentAccess(Long studentId) {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        boolean isAdmin = authentication.getAuthorities()
+                .stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (isAdmin) {
+            return;
+        }
+
+        String email = authentication.getName();
+
+        Student loggedInStudent = studentRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Logged in student not found"));
+
+        if (!loggedInStudent.getId().equals(studentId)) {
+            throw new AccessDeniedException(
+                    "You can update only your own skills.");
+        }
+    }
 
 }

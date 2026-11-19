@@ -19,6 +19,7 @@ import java.util.List;
 import com.sharayu.skillgap.dto.SkillGapResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.sharayu.skillgap.service.GeminiService;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -32,6 +33,7 @@ public class SkillGapService {
     private final StudentRepository studentRepository;
     private final JobRoleRepository jobRoleRepository;
     private final SkillCalculationEngine skillCalculationEngine;
+    private final GeminiService geminiService;
 
 
    /* public SkillGapService(RoleSkillWeightRepository roleSkillWeightRepository, StudentSkillRepository studentSkillRepository,StudentRepository studentRepository, JobRoleRepository jobRoleRepository) {
@@ -120,13 +122,16 @@ public class SkillGapService {
                             role.getId()
                     );
 
-            results.add(
-                    new RoleRecommendationDto(
-                            result.getRoleName(),
-                            result.getMatchPercentage(),
-                            result.isEligible()
-                    )
-            );
+
+            if (result.getMatchPercentage() > 50.0) {
+                results.add(
+                        new RoleRecommendationDto(
+                                result.getRoleName(),
+                                result.getMatchPercentage(),
+                                result.isEligible()
+                        )
+                );
+            }
         }
 
         log.info("Sorting role recommendations by MatchPercentage");
@@ -159,4 +164,79 @@ public class SkillGapService {
 
         return roles.get(0);
     }
+
+    public String getAiRecommendation(Long studentId) {
+
+        log.info("Generating AI recommendation for studentId: {}", studentId);
+
+        RoleRecommendationDto bestRole = getBestRole(studentId);
+
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Student not found"));
+
+        List<StudentSkill> studentSkills =
+                studentSkillRepository.findByStudentId(studentId);
+
+        JobRole jobRole = jobRoleRepository.findAll()
+                .stream()
+                .filter(role -> role.getRoleName().equals(bestRole.getRoleName()))
+                .findFirst()
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Role not found"));
+
+        List<RoleSkillWeight> roleSkills =
+                roleSkillWeightRepository.findByJobRoleId(jobRole.getId());
+
+        StringBuilder prompt = new StringBuilder();
+
+        prompt.append("You are an expert career advisor.\n\n");
+
+        prompt.append("Student Target Role: ")
+                .append(jobRole.getRoleName())
+                .append("\n\n");
+
+        prompt.append("Student Current Skills:\n");
+
+        for (StudentSkill skill : studentSkills) {
+
+            prompt.append("- ")
+                    .append(skill.getSkill().getSkillName())
+                    .append(" : ")
+                    .append(skill.getCurrentLevel())
+                    .append("%\n");
+        }
+
+        prompt.append("\nRequired Skills For ")
+                .append(jobRole.getRoleName())
+                .append(":\n");
+
+        for (RoleSkillWeight roleSkill : roleSkills) {
+
+            prompt.append("- ")
+                    .append(roleSkill.getSkill().getSkillName())
+                    .append(" : ")
+                    .append(roleSkill.getRequiredLevel())
+                    .append("%\n");
+        }
+
+        prompt.append("""
+
+Based on the above information:
+
+1. Identify missing skills.
+2. Mention which skills need improvement.
+3. Suggest the target level for every weak skill.
+4. Recommend a learning roadmap.
+5. Give final career advice.
+
+Use simple English.
+Maximum 200 words.
+""");
+
+        log.info("Sending prompt to Gemini API");
+
+        return geminiService.getRecommendation(prompt.toString());
+    }
+
 }

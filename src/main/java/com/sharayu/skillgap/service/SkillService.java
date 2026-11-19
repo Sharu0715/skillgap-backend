@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -41,12 +43,18 @@ public class SkillService {
                 .orElseThrow(() -> new ResourceNotFoundException("Skill not found with id: " +id));
     }
 
-    public List<Skill> getAllSkills() {
+    public Page<Skill> getAllSkills(Pageable pageable) {
 
-        log.info("Fetching all skills");
+        log.info("Fetching skills with pageable:{}",pageable);
 
+        return skillRepository.findAll(pageable);
+    }
+
+    public List<Skill> getAllSkillsForDropdown() {
+        log.info("Fetching all skills for student dropdown");
         return skillRepository.findAll();
     }
+
 
     public Skill updateSkill(Long id, Skill skill) {
 
@@ -70,5 +78,7 @@ public class SkillService {
 
         skillRepository.delete(skill);
     }
+
+
 
 }

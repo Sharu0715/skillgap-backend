@@ -7,6 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 @RequiredArgsConstructor
@@ -33,14 +36,22 @@ public class SkillController {
         return skillService.getSkillById(id);
     }
 
+
     @GetMapping
-    public ResponseEntity<List<Skill>> getAllSkills(){
+    public ResponseEntity<Page<Skill>> getAllSkills(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
-        log.info("Received request to get all skills");
+        log.info("Received request to get skills. Page: {}, Size: {}",
+                page, size);
 
-        return  ResponseEntity.ok(skillService.getAllSkills());
-
+        return ResponseEntity.ok(
+                skillService.getAllSkills(
+                        PageRequest.of(page, size)
+                )
+        );
     }
+
 
     @PutMapping("/{id}")
     public Skill updateSkill(@PathVariable Long id, @RequestBody Skill skill){
@@ -58,4 +69,11 @@ public class SkillController {
         skillService.deleteSkill(id);
         return skillService.getSkillById(id);
     }
+    @GetMapping("/dropdown")
+    public ResponseEntity<List<Skill>> getAllSkillsForDropdown() {
+        return ResponseEntity.ok(
+                skillService.getAllSkillsForDropdown()
+        );
+    }
 }
+
